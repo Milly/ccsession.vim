@@ -1,0 +1,167 @@
+*ccsession.txt*				Claude Code session source for ddu.vim
+
+Author: Milly (https://github.com/Milly)
+License: MIT license
+
+CONTENTS						  *ccsession-contents*
+
+Introduction		|ccsession-introduction|
+Install			|ccsession-install|
+Examples		|ccsession-examples|
+Source			|ccsession-source|
+  Params		|ccsession-source-params|
+Kind			|ccsession-kind|
+  Actions		|ccsession-kind-actions|
+  Params		|ccsession-kind-params|
+
+
+==============================================================================
+INTRODUCTION					      *ccsession-introduction*
+
+This plugin provides a ddu.vim source and kind to collect and resume Claude
+Code sessions. It allows you to easily browse and restore previous Claude Code
+conversation sessions directly from Vim/Neovim.
+
+
+==============================================================================
+INSTALL							   *ccsession-install*
+
+Please install "ddu.vim" and "denops.vim".
+
+https://github.com/vim-denops/denops.vim
+https://github.com/Shougo/ddu.vim
+
+
+==============================================================================
+EXAMPLES						  *ccsession-examples*
+
+Show sessions for the current project:
+>vim
+	call ddu#start(#{ sources: ['ccsession'] })
+<
+Show sessions for specific projects:
+>vim
+	call ddu#start(#{
+	      \  sources: [#{
+	      \    name: 'ccsession',
+	      \    params: #{
+	      \      projectPaths: ['~/project1', '~/project2'],
+	      \    },
+	      \  }],
+	      \})
+
+Show all Claude Code sessions:
+>vim
+	call ddu#start(#{
+	      \  sources: [#{
+	      \    name: 'ccsession',
+	      \    params: #{ all: v:true },
+	      \  }],
+	      \})
+<
+Set ddu source parameters globally. |ccsession-source-params|
+>vim
+	call ddu#custom#patch_global('sourceParams', #{
+	      \  ccsession: #{
+	      \    all: v:false,
+	      \    projectPaths: [],
+	      \  }
+	      \})
+<
+Set ddu kind parameters globally. |ccsession-kind-params|
+>vim
+	call ddu#custom#patch_global('kindParams', #{
+	      \  ccsession: #{
+	      \    allowMultipleResume: v:false,
+	      \    terminalOpenModifier: 'horizontal',
+	      \  }
+	      \})
+<
+
+==============================================================================
+SOURCE				       *ccsession-source* *ddu-source-ccsession*
+
+PARAMS			 *ccsession-source-params* *ddu-source-ccsession-params*
+
+				*ccsession-source-param-all*
+				*ddu-source-ccsession-param-all*
+all		(boolean)
+		If true, shows all Claude Code sessions across all projects.
+		If false, shows only sessions for specified projects or the
+		current working directory.
+
+		Default: v:false
+
+				*ccsession-source-param-projectPaths*
+				*ddu-source-ccsession-param-projectPaths*
+projectPaths	(string[])
+		List of project paths to filter sessions. If empty and |all|
+		is false, uses the current working directory.
+		Paths can be absolute or relative to the current working
+		directory.
+
+		Default: []
+
+
+==============================================================================
+KIND					*ccsession-kind* *ddu-kind-ccsession*
+
+ACTIONS			*ccsession-kind-actions* *ddu-kind-ccsession-actions*
+
+				*ccsession-kind-action-resumeSession*
+resumeSession
+		Resume the selected Claude Code session in a new terminal
+		window. This is the primary action for restoring a previous
+		conversation.
+
+		The terminal will be opened with the Claude Code command and
+		the session will be automatically resumed.
+
+PARAMS			*ccsession-kind-params* *ddu-kind-ccsession-params*
+
+				*ccsession-kind-param-maxSelectionsToResume*
+				*ddu-kind-ccsession-param-maxSelectionsToResume*
+maxSelectionsToResume	(number)
+		Maximum number of sessions that can be resumed from multiple
+		selections. This limit prevents accidentally launching too
+		many sessions at once.
+
+		Default: `1`
+
+				*ccsession-kind-param-agentCommand*
+				*ddu-kind-ccsession-param-agentCommand*
+agentCommand	(string)
+		Command to run the Claude Code agent.
+
+		Default: `"claude"`
+
+				*ccsession-kind-param-agentArgs*
+				*ddu-kind-ccsession-param-agentArgs*
+agentArgs	(string[])
+		Arguments to pass to the agent command.
+		`%{sessionId}` will be replaced with the actual session ID.
+
+		Default: `["--resume", "%{sessionId}"]`
+
+				*ccsession-kind-param-cwd*
+				*ddu-kind-ccsession-param-cwd*
+cwd		(string)
+		Project directory path. If not specified, the current working
+		directory will be used.
+
+		Default: Current working directory
+
+				*ccsession-kind-param-terminalOpenModifier*
+				*ddu-kind-ccsession-param-terminalOpenModifier*
+terminalOpenModifier	(string)
+		Modifier commands to open a terminal window.
+		This is prepended to the command used to open the terminal.
+		It must be a valid Vim command.
+
+		For example, `"botright vertical"`.
+
+		Default: `"horizontal"`
+
+
+==============================================================================
+vim:tw=78:ts=8:ft=help:norl:noet:fen:noet:
