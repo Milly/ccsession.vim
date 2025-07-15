@@ -11,6 +11,16 @@ import { isCcSessionActionData } from "../predicate.ts";
 import { defaultParams } from "../kind.ts";
 import { CcSessionDispatcher } from "../../types.ts";
 
+const PLUGIN_NAME = "ccsession" as const;
+const RESUME_SESSION_FN =
+  "resumeSession" as const satisfies keyof CcSessionDispatcher;
+
+type DispatchResumeArgs = [
+  typeof PLUGIN_NAME,
+  typeof RESUME_SESSION_FN,
+  ...Parameters<CcSessionDispatcher[typeof RESUME_SESSION_FN]>,
+];
+
 /**
  * Action callback to resume Claude Code session(s).
  *
@@ -44,15 +54,14 @@ export async function resumeSession(
         { name: "item.action" },
       );
 
-      const resumeArgs: Parameters<CcSessionDispatcher["resume"]> = [
+      const resumeArgs: DispatchResumeArgs = [
+        PLUGIN_NAME,
+        RESUME_SESSION_FN,
         sessionId,
         { cwd: projectPath, ...resumeOptions },
       ];
 
-      await abortable(
-        denops.dispatch("ccsession", "resume", ...resumeArgs),
-        signal,
-      );
+      await abortable(denops.dispatch(...resumeArgs), signal);
     } catch (error) {
       if (error === signal.reason) break;
       await printError(
